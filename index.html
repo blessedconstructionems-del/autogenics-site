@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Autogenics — A new form of AI intelligence</title>
+<meta name="description" content="Autogenics is building a new form of AI intelligence: intelligence that learns from its own work, and keeps what it learns.">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Autogenics">
+<meta property="og:title" content="Autogenics — A new form of AI intelligence">
+<meta property="og:description" content="Intelligence that learns from its own work, and keeps what it learns.">
+<meta property="og:image" content="__SITE__/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:url" content="__SITE__/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="__SITE__/og.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" as="image" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--ink:#ececee;--soft:#c8c8cd;--quiet:#8b8b92;--faint:#5a5a60;--rule:rgba(255,255,255,.09)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.grain{position:fixed;inset:-50%;pointer-events:none;z-index:20;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:grain 1.4s steps(6) infinite}
+@keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}}
+
+.hero{position:relative;min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:0 6vw;overflow:hidden}
+.glow{position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(205,212,228,.11),rgba(120,128,150,.045) 38%,transparent 68%);animation:breathe 10s ease-in-out infinite;pointer-events:none}
+@keyframes breathe{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(.95)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}}
+.mark{position:relative;width:min(1080px,88vw);aspect-ratio:1757/284;opacity:0;filter:blur(16px);transform:scale(1.035);animation:arrive 3s cubic-bezier(.16,1,.3,1) .35s forwards}
+.mark img{display:block;width:100%;height:100%}
+.sheen{position:absolute;inset:0;-webkit-mask:url(logo.png) center/100% 100% no-repeat;mask:url(logo.png) center/100% 100% no-repeat;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%) no-repeat;background-size:300% 100%;background-position:85% 0;mix-blend-mode:screen;animation:sheen 10s ease-in-out 3.4s infinite}
+@keyframes arrive{to{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes sheen{0%{background-position:85% 0}16%,100%{background-position:15% 0}}
+.cue{position:absolute;bottom:34px;left:50%;width:1px;height:56px;background:linear-gradient(var(--quiet),transparent);transform:translateX(-50%);opacity:0;animation:cue 2.6s ease-in-out 3.8s infinite}
+@keyframes cue{0%{opacity:0;transform:translate(-50%,-12px)}40%{opacity:.7}100%{opacity:0;transform:translate(-50%,12px)}}
+
+section{padding:22vh 7vw}
+.lede{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:clamp(34px,5.4vw,84px);line-height:1.06;letter-spacing:-.012em;text-align:center;max-width:1120px;margin:0 auto}
+.lede em{color:var(--soft)}
+
+.define{text-align:center;padding-top:6vh}
+.word{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:clamp(40px,4.4vw,66px);line-height:1}
+.pron{margin-top:14px;font-size:14px;letter-spacing:.08em;color:var(--quiet)}
+.pron i{letter-spacing:.02em}
+.meaning{margin-top:24px;font-size:clamp(17px,1.5vw,20px);color:var(--soft)}
+
+.founder{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;gap:5vw;max-width:1180px;margin:0 auto}
+.portrait{aspect-ratio:1042/1386;-webkit-mask-image:radial-gradient(ellipse 70% 76% at 50% 40%,#000 52%,transparent 100%);mask-image:radial-gradient(ellipse 70% 76% at 50% 40%,#000 52%,transparent 100%)}
+.portrait img{display:block;width:100%;height:100%;object-fit:cover}
+.name{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(40px,4.2vw,64px);line-height:1}
+.role{margin-top:16px;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--quiet)}
+
+.private{padding:16vh 7vw 12vh;text-align:center;font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:var(--quiet)}
+footer{border-top:1px solid var(--rule);padding:28px 7vw 40px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;letter-spacing:.06em;color:var(--faint)}
+
+.reveal{opacity:0;transform:translateY(28px);filter:blur(6px);transition:opacity 1.6s cubic-bezier(.16,1,.3,1),transform 1.6s cubic-bezier(.16,1,.3,1),filter 1.6s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:none;filter:none}
+.founder .who.reveal{transition-delay:.25s}
+
+@media (max-width:760px){
+  section{padding:16vh 7vw}
+  .founder{grid-template-columns:1fr;text-align:center;gap:28px}
+  .portrait{max-width:440px;width:100%;margin:0 auto}
+  footer{justify-content:center;text-align:center}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .mark,.reveal{opacity:1;filter:none;transform:none}
+}
+</style>
+<noscript><style>.reveal{opacity:1;transform:none;filter:none}</style></noscript>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="sr">Autogenics</h1>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="mark">
+    <img src="logo.png" alt="Autogenics — A new form of AI intelligence" width="1757" height="284">
+    <div class="sheen" aria-hidden="true"></div>
+  </div>
+  <div class="cue" aria-hidden="true"></div>
+</header>
+
+<main>
+  <section>
+    <p class="lede reveal">Intelligence that learns from its own work, <em>and keeps what it learns.</em></p>
+  </section>
+
+  <section class="define reveal" aria-label="Definition">
+    <div class="word">au·to·gen·ic</div>
+    <div class="pron">/ˌô-tō-ˈje-nik/ &nbsp;·&nbsp; <i>adjective</i></div>
+    <div class="meaning">Self-generated; produced from within.</div>
+  </section>
+
+  <section>
+    <div class="founder">
+      <div class="portrait reveal"><img src="portrait.jpg" alt="Dakota Stewart, founder of Autogenics" width="1042" height="1386" loading="lazy"></div>
+      <div class="who reveal">
+        <div class="name">Dakota Stewart</div>
+        <div class="role">Co-founder &amp; CEO</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="private reveal">In private development</div>
+</main>
+
+<footer>
+  <span>© 2026 Autogenics</span>
+  <span>A new form of AI intelligence</span>
+</footer>
+
+<script>
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .18});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
