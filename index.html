@@ -22,6 +22,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<script>
+// Decide before first paint, so the CSS logo never flashes under the live one.
+if (window.WebGL2RenderingContext && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('gl');
+// Every visit starts from the top with the full intro: no restored scroll position, and a
+// page brought back from the browser's back/forward cache reloads fresh.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+addEventListener('pagehide', () => scrollTo(0, 0));
+addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
+addEventListener('DOMContentLoaded', () => scrollTo(0, 0));
+</script>
 <style>
 :root{--bg:#000;--ink:#ececee;--soft:#c8c8cd;--quiet:#8b8b92;--faint:#5a5a60;--rule:rgba(255,255,255,.09)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -85,6 +95,38 @@ footer{border-top:1px solid var(--rule);padding:28px 7vw 40px;display:flex;justi
 .reveal.in{opacity:1;transform:none;filter:none}
 .founder .who.reveal{transition-delay:.25s}
 
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:none}
+html.gl #gl{display:block}
+.glow{z-index:0}
+html.gl .glow{background:radial-gradient(closest-side,rgba(205,212,228,.1),rgba(120,128,150,.035) 24%,transparent 42%)}
+main,footer{position:relative;z-index:2}
+.cue{z-index:2}
+html.gl .mark{animation:none;opacity:1;filter:none;transform:none}
+html.gl .mark img,html.gl .mark .sheen{opacity:0}
+.flare{position:absolute;left:50%;top:40%;width:118%;height:2px;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scaleX(0);background:linear-gradient(90deg,transparent,rgba(214,224,255,.9) 50%,transparent);filter:blur(.5px);box-shadow:0 0 18px 2px rgba(190,205,255,.35)}
+.flare.go{animation:flare 1.7s cubic-bezier(.2,.8,.2,1) forwards}
+.controls{position:fixed;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));z-index:30;display:flex;gap:8px}
+.sound,.replay{display:none;align-items:center;gap:10px;padding:10px 15px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(10,10,12,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--soft);font:400 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;opacity:0;transition:opacity 1.2s ease,border-color .3s ease,color .3s ease}
+html.gl .sound{display:inline-flex}
+html.gl .replay:not([hidden]){display:inline-flex}
+.sound.ready,.replay{opacity:1}
+.sound:hover,.replay:hover{border-color:rgba(255,255,255,.32);color:var(--ink)}
+.sound:focus-visible,.replay:focus-visible{outline:1px solid var(--soft);outline-offset:3px}
+.bars{display:inline-flex;align-items:flex-end;gap:2px;height:11px}
+.bars i{display:block;width:2px;height:3px;background:currentColor;border-radius:1px}
+.sound.on .bars i{animation:bar .9s ease-in-out infinite}
+.sound.on .bars i:nth-child(2){animation-delay:-.3s}
+.sound.on .bars i:nth-child(3){animation-delay:-.6s}
+.sound.on .bars i:nth-child(4){animation-delay:-.15s}
+@keyframes bar{0%,100%{height:3px}50%{height:11px}}
+.typed .ch{opacity:0}
+.typed .ch.on{opacity:1}
+.caret{position:relative;display:inline-block;width:0;height:.95em;vertical-align:-.12em}
+.caret::after{content:"";position:absolute;left:.05em;top:0;bottom:0;width:2px;background:currentColor;animation:blink 1s steps(1) infinite}
+.caret.done{opacity:0;transition:opacity .8s ease}
+@keyframes blink{50%{opacity:0}}
+@keyframes flare{0%{opacity:0;transform:translate(-50%,-50%) scaleX(0)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scaleX(1.12)}}
+
 @media (max-width:760px){
   section{padding:16vh 7vw}
   .founder{grid-template-columns:1fr;text-align:center;gap:28px}
@@ -102,6 +144,7 @@ footer{border-top:1px solid var(--rule);padding:28px 7vw 40px;display:flex;justi
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
 
 <header class="hero">
   <h1 class="sr">Autogenics</h1>
@@ -109,6 +152,7 @@ footer{border-top:1px solid var(--rule);padding:28px 7vw 40px;display:flex;justi
   <div class="mark">
     <img src="logo.png" alt="Autogenics — A new form of AI intelligence" width="1757" height="284">
     <div class="sheen" aria-hidden="true"></div>
+    <div class="flare" aria-hidden="true"></div>
   </div>
   <div class="cue" aria-hidden="true"></div>
 </header>
@@ -158,6 +202,62 @@ footer{border-top:1px solid var(--rule);padding:28px 7vw 40px;display:flex;justi
 <script>
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .18});
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// The definition types itself in when it scrolls into view.
+(() => {
+  const box = document.querySelector('.define');
+  if (!box || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const lines = [...box.querySelectorAll('.word, .pron, .meaning')];
+  const spoken = document.createElement('p');
+  spoken.className = 'sr';
+  spoken.textContent = lines.map(l => l.textContent.replace(/\s+/g, ' ').trim()).join(' ');
+  box.append(spoken);
+  const chars = lines.map(line => {
+    line.setAttribute('aria-hidden', 'true');
+    line.classList.add('typed');
+    const list = [];
+    const split = node => {
+      for (const child of [...node.childNodes]) {
+        if (child.nodeType !== 3) { split(child); continue; }
+        const frag = document.createDocumentFragment();
+        for (const c of child.textContent) {
+          const s = document.createElement('span');
+          s.className = 'ch'; s.textContent = c;
+          frag.append(s); list.push(s);
+        }
+        child.replaceWith(frag);
+      }
+    };
+    split(line);
+    return list;
+  });
+  const caret = document.createElement('span');
+  caret.className = 'caret';
+  const speed = [85, 45, 50], pause = [380, 260, 0];   // ms: the word, the pronunciation, the meaning
+  new IntersectionObserver((entries, observer) => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    observer.disconnect();
+    let at = 350;
+    chars.forEach((list, i) => {
+      for (const ch of list) {
+        at += speed[i] * (ch.textContent.trim() ? .75 + Math.random() * .5 : .4);
+        setTimeout(() => {
+          ch.classList.add('on');
+          ch.after(caret);
+          dispatchEvent(new CustomEvent('type:key', { detail: { space: !ch.textContent.trim() } }));   // sound.js
+        }, at);
+      }
+      at += pause[i];
+    });
+    setTimeout(() => caret.classList.add('done'), at + 900);
+  }, { threshold: .55 }).observe(box);
+})();
 </script>
+<div class="controls">
+  <button class="sound" type="button" aria-pressed="false"><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="label">Sound off</span></button>
+  <button class="replay" type="button" hidden>Replay</button>
+</div>
+<script type="module" src="hero3d.js?v=7"></script>
+<script type="module" src="sound.js?v=8"></script>
 </body>
 </html>
