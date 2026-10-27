@@ -251,26 +251,30 @@ async function boot() {
   };
 
   addEventListener('pointermove', e => {
-    const aspect = innerWidth / innerHeight;
-    pointer.x = (e.clientX / innerWidth * 2 - 1) * aspect;
-    pointer.y = 1 - e.clientY / innerHeight * 2;
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    pointer.x = (e.clientX / cw * 2 - 1) * (cw / ch);
+    pointer.y = 1 - e.clientY / ch * 2;
     if (!pointer.seen) { pointer.sx = pointer.x; pointer.sy = pointer.y; pointer.seen = true; }
   }, { passive: true });
-  hero.addEventListener('pointerdown', () => {
+  // A click or a tap bursts the mark; a touch that turns into a scroll does not.
+  hero.addEventListener('click', () => {
     if (now() > 4.6) { pulseAt = now(); dispatchEvent(new Event('hero:pulse')); }
   });
 
   function frame() {
     const t = now();
     frameNo++;
+    // The canvas is sized to the large viewport (CSS 100lvh), so a phone's address bar
+    // sliding in and out during a scroll never reallocates it.
     const dpr = Math.min(2, devicePixelRatio || 1);
-    const W = Math.round(innerWidth * dpr), H = Math.round(innerHeight * dpr);
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    const W = Math.round(cw * dpr), H = Math.round(ch * dpr);
     if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
-    const aspect = innerWidth / innerHeight;
+    const aspect = cw / ch;
 
     const r = mark.getBoundingClientRect();
-    const center = [((r.left + r.width / 2) / innerWidth * 2 - 1) * aspect, 1 - (r.top + r.height / 2) / innerHeight * 2];
-    const half = [r.width / innerWidth * aspect, r.height / innerHeight];
+    const center = [((r.left + r.width / 2) / cw * 2 - 1) * aspect, 1 - (r.top + r.height / 2) / ch * 2];
+    const half = [r.width / cw * aspect, r.height / ch];
 
     // The mark finishes forming and stays formed; it simply scrolls with the page.
     const reveal = smooth(3.9, 5.6, t);
