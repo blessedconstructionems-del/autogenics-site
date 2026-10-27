@@ -232,14 +232,16 @@ async function boot() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.enable(gl.BLEND);
 
-  const pointer = { x: 0, y: 0, sx: 0, sy: 0, seen: false };
+  const pointer = { x: 0, y: 0, sx: 0, sy: 0, seen: false, type: 'mouse', touching: false, movedAt: -1e9 };
   const tilt = { x: 0, y: 0 };
+  const glint = { x: 0, y: .35 };
   let pulseAt = -99, flared = false, frameNo = 0, blank = false;
   let begin = performance.now();
   const now = () => (still ?? (performance.now() - begin) / 1000);
   // sound.js reads the intro clock and can replay the intro.
   window.autogenicsHero = {
     time: now,
+    tilt: () => [tilt.x, tilt.y],
     restart() {
       scrollTo(0, 0);
       flare?.classList.remove('go');
@@ -250,12 +252,19 @@ async function boot() {
     },
   };
 
-  addEventListener('pointermove', e => {
+  const track = e => {
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
     pointer.x = (e.clientX / cw * 2 - 1) * (cw / ch);
     pointer.y = 1 - e.clientY / ch * 2;
+    pointer.type = e.pointerType;
+    pointer.movedAt = performance.now();
     if (!pointer.seen) { pointer.sx = pointer.x; pointer.sy = pointer.y; pointer.seen = true; }
-  }, { passive: true });
+  };
+  addEventListener('pointermove', track, { passive: true });
+  addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { pointer.touching = true; track(e); } }, { passive: true });
+  // A finger lifting (or turning into a scroll) and a mouse leaving the page let the mark settle straight.
+  for (const type of ['pointerup', 'pointercancel']) addEventListener(type, e => { if (e.pointerType !== 'mouse') pointer.touching = false; }, { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => { pointer.movedAt = -1e9; });
   // A click or a tap bursts the mark; a touch that turns into a scroll does not.
   hero.addEventListener('click', () => {
     if (now() > 4.6) { pulseAt = now(); dispatchEvent(new Event('hero:pulse')); }
@@ -283,13 +292,18 @@ async function boot() {
     const dust = 1 - .86 * smooth(4.4, 6.4, t);
     const assemble = clamp((t - 1) / 3.1);
 
-    // The light and the tilt follow the viewer; with no pointer, a slow drift.
+    // The tilt and the light follow a finger while it touches, or a mouse while it moves.
+    // Otherwise the mark eases back to straight and the light drifts slowly across it.
     pointer.sx += (pointer.x - pointer.sx) * .08;
     pointer.sy += (pointer.y - pointer.sy) * .08;
-    const rel = pointer.seen ? [(pointer.sx - center[0]) / Math.max(half[0], .3), (pointer.sy - center[1]) / .9] : [Math.sin(t * .35) * .6, Math.sin(t * .27) * .35];
+    const active = pointer.seen && (pointer.type === 'mouse' ? performance.now() - pointer.movedAt < 2500 : pointer.touching);
+    const rel = active ? [(pointer.sx - center[0]) / Math.max(half[0], .3), (pointer.sy - center[1]) / .9] : [0, 0];
     tilt.x += (clamp(-rel[1], -1, 1) * .1 - tilt.x) * .06;
     tilt.y += (clamp(rel[0], -1, 1) * .17 - tilt.y) * .06;
-    const light = pointer.seen ? [pointer.sx, pointer.sy] : [center[0] + Math.sin(t * .4) * half[0] * .9, center[1] + .35];
+    const drift = [center[0] + Math.sin(t * .4) * half[0] * .9, center[1] + .35];
+    glint.x += ((active ? pointer.sx : drift[0]) - glint.x) * .06;
+    glint.y += ((active ? pointer.sy : drift[1]) - glint.y) * .06;
+    const light = [glint.x, glint.y];
 
     if (!flared && t >= 4.1 && flare) { flare.classList.add('go'); flared = true; }
 
@@ -324,7 +338,7 @@ async function boot() {
       gl.uniform2f(particles.u.uCenter, ...center);
       gl.uniform2f(particles.u.uHalf, ...half);
       gl.uniform2f(particles.u.uTilt, tilt.x, tilt.y);
-      gl.uniform2f(particles.u.uMouse, pointer.seen ? pointer.sx : 99, pointer.seen ? pointer.sy : 99);
+      gl.uniform2f(particles.u.uMouse, active ? pointer.sx : 99, active ? pointer.sy : 99);
       gl.uniform1f(particles.u.uAspect, aspect);
       gl.uniform1f(particles.u.uTime, t);
       gl.uniform1f(particles.u.uAssemble, assemble);
